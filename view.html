@@ -2,59 +2,133 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fabric Information</title>
 <style>
-  body { font-family: Arial; padding: 20px; }
-  #info { font-size: 14px; }
-  #info div { margin-bottom: 5px; }
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 400px;
+}
+
+td {
+  padding: 8px;
+  border: 1px solid #ccc;
+}
+
+#lang {
+  margin-bottom: 20px;
+  padding: 5px;
+}
 </style>
 </head>
+
 <body>
 
-<h2>Fabric Information</h2>
-<div id="info">Loading...</div>
+<select id="lang">
+  <option value="en">English</option>
+  <option value="cn">中文</option>
+</select>
+
+<h2 id="title">Fabric Information</h2>
+
+<table id="info">
+  <tr><td id="tdRef">Ref</td><td id="valRef"></td></tr>
+  <tr><td id="tdBatch">Batch</td><td id="valBatch"></td></tr>
+  <tr><td id="tdWidth">Width</td><td id="valWidth"></td></tr>
+  <tr><td id="tdColor">Color</td><td id="valColor"></td></tr>
+  <tr><td id="tdLength">Length</td><td id="valLength"></td></tr>
+  <tr><td id="tdRoll">Roll No</td><td id="valRoll"></td></tr>
+</table>
 
 <script>
-const SUPABASE_URL = "https://nbzlglatwvomrhflqvgi.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs";
+const config = {
+  supabaseUrl: "https://nbzlglatwvomrhflqvgi.supabase.co",
+  apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs"
+};
 
-// 获取 URL 参数 id
-const params = new URLSearchParams(window.location.search);
-const rollId = params.get("id");
+const langPack = {
+  en: {
+    title: "Fabric Information",
+    ref: "Ref",
+    batch: "Batch",
+    width: "Width",
+    color: "Color",
+    length: "Length",
+    roll: "Roll No"
+  },
+  cn: {
+    title: "面料信息",
+    ref: "编号",
+    batch: "批次",
+    width: "幅宽",
+    color: "颜色",
+    length: "米数",
+    roll: "卷号"
+  }
+};
 
-if (!rollId) {
-    document.getElementById("info").innerText = "Invalid QR Code";
-} else {
-    fetch(`${SUPABASE_URL}/rest/v1/rolls?id=eq.${rollId}`, {
-        headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": "Bearer " + SUPABASE_KEY,
-            "Content-Type": "application/json"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.length === 0) {
-            document.getElementById("info").innerText = "No Data Found";
-        } else {
-            const d = data[0];
-            document.getElementById("info").innerHTML = `
-                <div>Ref: ${d.ref}</div>
-                <div>Batch: ${d.batch}</div>
-                <div>Width: ${d.size}</div>
-                <div>Color: ${d.color}</div>
-                <div>Length: ${d.length} m</div>
-                <div>Roll#: ${d.roll_number}</div>
-                <div>Order#: ${d.order_number}</div>
-            `;
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        document.getElementById("info").innerText = "Error loading data";
-    });
+document.getElementById("lang").onchange = switchLang;
+
+function switchLang() {
+  const lang = document.getElementById("lang").value;
+  const t = langPack[lang];
+
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("tdRef").innerText = t.ref;
+  document.getElementById("tdBatch").innerText = t.batch;
+  document.getElementById("tdWidth").innerText = t.width;
+  document.getElementById("tdColor").innerText = t.color;
+  document.getElementById("tdLength").innerText = t.length;
+  document.getElementById("tdRoll").innerText = t.roll;
 }
+
+// 读取 URL 参数 id
+function getId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
+}
+
+// 查询 Supabase 数据
+async function fetchData(id) {
+  const res = await fetch(`${config.supabaseUrl}/rest/v1/fabric?id=eq.${id}`, {
+    headers: {
+      "apikey": config.apiKey,
+      "Authorization": `Bearer ${config.apiKey}`
+    }
+  });
+  const data = await res.json();
+  return data[0]; // 返回第一个匹配
+}
+
+// 渲染表格
+async function render() {
+  const id = getId();
+  if (!id) return;
+
+  const row = await fetchData(id);
+  if (!row) {
+    document.getElementById("info").innerHTML = "<tr><td colspan='2'>No Data Found</td></tr>";
+    return;
+  }
+
+  document.getElementById("valRef").innerText = row.ref;
+  document.getElementById("valBatch").innerText = row.batch;
+  document.getElementById("valWidth").innerText = row.width;
+  document.getElementById("valColor").innerText = row.color;
+  document.getElementById("valLength").innerText = row.length;
+  document.getElementById("valRoll").innerText = row.roll;
+}
+
+render();
 </script>
 
 </body>
