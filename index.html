@@ -1,91 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Fabric QR System</title>
-<style>
-body { font-family: Arial; padding:20px;}
-input, select { display:block; margin:6px 0; padding:6px; width:260px;}
-button { padding:10px 20px; margin-top:10px; cursor:pointer;}
-#qrcode { margin-top:20px;}
-</style>
+  <meta charset="UTF-8">
+  <title>Fabric QR System</title>
+  <style>
+    body { font-family: Arial; padding:20px; }
+    input, select { display:block; margin:6px 0; padding:6px; width:260px; }
+    button { padding:10px 20px; margin-top:10px; cursor:pointer; }
+    #qrcode { margin-top:20px; }
+  </style>
 </head>
 <body>
 
-<select id="lang">
-  <option value="en">English</option>
-  <option value="cn">中文</option>
-</select>
+  <h2 id="title">Fabric Information</h2>
 
-<h2 id="title">Fabric Information</h2>
+  <select id="lang">
+    <option value="en">English</option>
+    <option value="cn">中文</option>
+  </select>
 
-<input id="ref" placeholder="Ref">
-<input id="batch" placeholder="Batch">
-<input id="width" placeholder="Width">
-<input id="color" placeholder="Color">
-<input id="length" placeholder="Length">
-<input id="roll" placeholder="Roll No">
+  <input id="ref" placeholder="Ref">
+  <input id="batch" placeholder="Batch">
+  <input id="width" placeholder="Width">
+  <input id="color" placeholder="Color">
+  <input id="length" placeholder="Length">
+  <input id="roll" placeholder="Roll No">
 
-<button onclick="generate()">Generate QR + Print</button>
+  <button onclick="generate()">Generate QR + Print</button>
 
-<div id="qrcode"></div>
+  <div id="qrcode"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script>
-const config = {
-  supabaseUrl: "https://nbzlglatwvomrhflqvgi.supabase.co",
-  apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs",
-  viewUrl: "https://qr-hf41.vercel.app/view.html"
-};
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-const langPack = {
-  en:{title:"Fabric Information", ref:"Ref", batch:"Batch", width:"Width", color:"Color", length:"Length", roll:"Roll No"},
-  cn:{title:"面料信息", ref:"编号", batch:"批次", width:"幅宽", color:"颜色", length:"米数", roll:"卷号"}
-};
+  <script>
+    const config = {
+      supabaseUrl: "https://nbzlglatwvomrhflqvgi.supabase.co", // 这里是 Supabase 项目的 URL
+      apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs", // 这里是你的 anon key 或 service role key
+      viewUrl: "https://fabricsystem.vercel.app/view.html" // 这里是 view.html 页面 URL
+    };
 
-document.getElementById("lang").onchange = switchLang;
-function switchLang() {
-  const t=langPack[document.getElementById("lang").value];
-  document.getElementById("title").innerText=t.title;
-  document.getElementById("ref").placeholder=t.ref;
-  document.getElementById("batch").placeholder=t.batch;
-  document.getElementById("width").placeholder=t.width;
-  document.getElementById("color").placeholder=t.color;
-  document.getElementById("length").placeholder=t.length;
-  document.getElementById("roll").placeholder=t.roll;
-}
+    const langPack = {
+      en: {title: "Fabric Information", ref: "Ref", batch: "Batch", width: "Width", color: "Color", length: "Length", roll: "Roll No"},
+      cn: {title: "面料信息", ref: "编号", batch: "批次", width: "幅宽", color: "颜色", length: "米数", roll: "卷号"}
+    };
 
-async function generate() {
-  const ref=document.getElementById("ref").value;
-  const batch=document.getElementById("batch").value;
-  const width=document.getElementById("width").value;
-  const color=document.getElementById("color").value;
-  const length=document.getElementById("length").value;
-  const roll=document.getElementById("roll").value;
-  const id=Date.now();
-  const url=`${config.viewUrl}?id=${id}`;
+    document.getElementById("lang").onchange = switchLang;
+    function switchLang() {
+      const t = langPack[document.getElementById("lang").value];
+      document.getElementById("title").innerText = t.title;
+      document.getElementById("ref").placeholder = t.ref;
+      document.getElementById("batch").placeholder = t.batch;
+      document.getElementById("width").placeholder = t.width;
+      document.getElementById("color").placeholder = t.color;
+      document.getElementById("length").placeholder = t.length;
+      document.getElementById("roll").placeholder = t.roll;
+    }
 
-  // 写入 Supabase
-  const res = await fetch(`${config.supabaseUrl}/rest/v1/fabric`,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "apikey":config.apiKey,
-      "Authorization":`Bearer ${config.apiKey}`
-    },
-    body:JSON.stringify({id,ref,batch,width,color,length,roll})
-  });
-  if(!res.ok){alert("写入失败"); return;}
+    async function generate() {
+      const ref = document.getElementById("ref").value;
+      const batch = document.getElementById("batch").value;
+      const width = document.getElementById("width").value;
+      const color = document.getElementById("color").value;
+      const length = document.getElementById("length").value;
+      const roll = document.getElementById("roll").value;
+      const id = Date.now();
+      const url = `${config.viewUrl}?id=${id}`;
 
-  // 生成二维码
-  document.getElementById("qrcode").innerHTML="";
-  new QRCode(document.getElementById("qrcode"),{text:url,width:150,height:150});
+      // 插入数据到 Supabase
+      const res = await fetch(`${config.supabaseUrl}/rest/v1/fabric`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": config.apiKey,
+          "Authorization": `Bearer ${config.apiKey}`
+        },
+        body: JSON.stringify({
+          id, ref, batch, width, color, length, roll
+        })
+      });
 
-  // 打印
-  fetch("http://localhost:3000/print",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url,ref,batch,width,color,length,roll})})
-  .then(res=>res.text()).then(msg=>console.log(msg)).catch(err=>console.error("打印失败:",err));
-}
-</script>
+      if (!res.ok) {
+        alert("写入失败：请检查 Supabase 配置");
+        return;
+      }
+
+      // 生成二维码
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: url,
+        width: 150,
+        height: 150
+      });
+
+      // 调用打印
+      fetch("http://localhost:3000/print", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, ref, batch, width, color, length, roll })
+      })
+        .then(res => res.text())
+        .then(msg => console.log(msg))
+        .catch(err => console.error("打印失败:", err));
+    }
+  </script>
 
 </body>
 </html>
