@@ -2,105 +2,246 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fabric QR System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fabric Information</title>
   <style>
-    body { font-family: Arial; padding:20px; }
-    input, select { display:block; margin:6px 0; padding:6px; width:260px; }
-    button { padding:10px 20px; margin-top:10px; cursor:pointer; }
-    #qrcode { margin-top:20px; }
+    /* 设置打印标签的尺寸为 70x50mm */
+    @media print {
+      @page {
+        size: 70mm 50mm;  /* 标签尺寸 */
+        margin: 0;         /* 去除页面边距 */
+      }
+
+      body {
+        width: 70mm;
+        height: 50mm;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      #qrcode {
+        width: 50mm;
+        height: 50mm;
+        margin-bottom: 10mm;
+      }
+
+      #fabric-details {
+        font-size: 12px;
+        line-height: 1.2;
+        padding: 0 5mm;
+      }
+
+      button {
+        display: none; /* 不在打印时显示按钮 */
+      }
+    }
+
+    /* 可选：页面展示样式 */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
-  <h2 id="title">Fabric Information</h2>
+  <h2>Fabric Information</h2>
 
-  <select id="lang">
-    <option value="en">English</option>
-    <option value="cn">中文</option>
-  </select>
+  <div id="fabric-details">
+    <!-- Fabric details will be dynamically loaded here -->
+  </div>
 
-  <input id="ref" placeholder="Ref">
-  <input id="batch" placeholder="Batch">
-  <input id="width" placeholder="Width">
-  <input id="color" placeholder="Color">
-  <input id="length" placeholder="Length">
-  <input id="roll" placeholder="Roll No">
+  <div id="qrcode"></div> <!-- This will hold the QR code for printing -->
 
-  <button onclick="generate()">Generate QR + Print</button>
-
-  <div id="qrcode"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <button id="print-btn" onclick="printLabel()">Print Label</button>
 
   <script>
-    const config = {
-      supabaseUrl: "https://nbzlglatwvomrhflqvgi.supabase.co", // 这里是 Supabase 项目的 URL
-      apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs", // 这里是你的 anon key 或 service role key
-      viewUrl: "https://fabricsystem.vercel.app/view.html" // 这里是 view.html 页面 URL
-    };
+    // Retrieve the 'id' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const fabricId = urlParams.get('id');
 
-    const langPack = {
-      en: {title: "Fabric Information", ref: "Ref", batch: "Batch", width: "Width", color: "Color", length: "Length", roll: "Roll No"},
-      cn: {title: "面料信息", ref: "编号", batch: "批次", width: "幅宽", color: "颜色", length: "米数", roll: "卷号"}
-    };
-
-    document.getElementById("lang").onchange = switchLang;
-    function switchLang() {
-      const t = langPack[document.getElementById("lang").value];
-      document.getElementById("title").innerText = t.title;
-      document.getElementById("ref").placeholder = t.ref;
-      document.getElementById("batch").placeholder = t.batch;
-      document.getElementById("width").placeholder = t.width;
-      document.getElementById("color").placeholder = t.color;
-      document.getElementById("length").placeholder = t.length;
-      document.getElementById("roll").placeholder = t.roll;
+    if (!fabricId) {
+      document.getElementById("fabric-details").innerText = "No fabric ID found in the URL.";
+      return;
     }
 
-    async function generate() {
-      const ref = document.getElementById("ref").value;
-      const batch = document.getElementById("batch").value;
-      const width = document.getElementById("width").value;
-      const color = document.getElementById("color").value;
-      const length = document.getElementById("length").value;
-      const roll = document.getElementById("roll").value;
-      const id = Date.now();
-      const url = `${config.viewUrl}?id=${id}`;
+    // Fetch fabric data from Supabase using the 'id' parameter
+    async function fetchFabricData() {
+      const res = await fetch(`https://<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fabric Information</title>
+  <style>
+    /* 设置打印标签的尺寸为 70x50mm */
+    @media print {
+      @page {
+        size: 70mm 50mm;  /* 标签尺寸 */
+        margin: 0;         /* 去除页面边距 */
+      }
 
-      // 插入数据到 Supabase
-      const res = await fetch(`${config.supabaseUrl}/rest/v1/fabric`, {
-        method: "POST",
+      body {
+        width: 70mm;
+        height: 50mm;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      #qrcode {
+        width: 50mm;
+        height: 50mm;
+        margin-bottom: 10mm;
+      }
+
+      #fabric-details {
+        font-size: 12px;
+        line-height: 1.2;
+        padding: 0 5mm;
+      }
+
+      button {
+        display: none; /* 不在打印时显示按钮 */
+      }
+    }
+
+    /* 可选：页面展示样式 */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Fabric Information</h2>
+
+  <div id="fabric-details">
+    <!-- Fabric details will be dynamically loaded here -->
+  </div>
+
+  <div id="qrcode"></div> <!-- This will hold the QR code for printing -->
+
+  <button id="print-btn" onclick="printLabel()">Print Label</button>
+
+  <script>
+    // Retrieve the 'id' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const fabricId = urlParams.get('id');
+
+    if (!fabricId) {
+      document.getElementById("fabric-details").innerText = "No fabric ID found in the URL.";
+      return;
+    }
+
+    // Fetch fabric data from Supabase using the 'id' parameter
+    async function fetchFabricData() {
+      const res = await fetch(`https://nbzlglatwvomrhflqvgi.supabase.co/rest/v1/fabric?id=eq.${fabricId}`, {
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          "apikey": config.apiKey,
-          "Authorization": `Bearer ${config.apiKey}`
-        },
-        body: JSON.stringify({
-          id, ref, batch, width, color, length, roll
-        })
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcGZ3aGpncWVhamNla3V1bHpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDQ4MTYsImV4cCI6MjA5MTIyMDgxNn0.iv8Dre6jCfgMm5ZpF6lSYA_jWX7CUIUGkOZmkhk3_zI",
+          "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcGZ3aGpncWVhamNla3V1bHpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDQ4MTYsImV4cCI6MjA5MTIyMDgxNn0.iv8Dre6jCfgMm5ZpF6lSYA_jWX7CUIUGkOZmkhk3_zI`,
+          "Content-Type": "application/json"
+        }
       });
 
-      if (!res.ok) {
-        alert("写入失败：请检查 Supabase 配置");
+      const fabricData = await res.json();
+
+      if (fabricData.length === 0) {
+        document.getElementById("fabric-details").innerText = "No data found for this fabric.";
         return;
       }
 
-      // 生成二维码
-      document.getElementById("qrcode").innerHTML = "";
+      // Display fabric details
+      const fabric = fabricData[0];
+      document.getElementById("fabric-details").innerHTML = `
+        <p><strong>Ref:</strong> ${fabric.ref}</p>
+        <p><strong>Batch:</strong> ${fabric.batch}</p>
+        <p><strong>Width:</strong> ${fabric.width}</p>
+        <p><strong>Color:</strong> ${fabric.color}</p>
+        <p><strong>Length:</strong> ${fabric.length}</p>
+        <p><strong>Roll:</strong> ${fabric.roll}</p>
+      `;
+
+      // Generate QR code for this fabric
+      const url = `https://<your-deployed-url>/view.html?id=${fabricId}`;
       new QRCode(document.getElementById("qrcode"), {
         text: url,
-        width: 150,
-        height: 150
+        width: 50,
+        height: 50
+      });
+    }
+
+    fetchFabricData();
+
+    function printLabel() {
+      const printContent = document.getElementById("qrcode").innerHTML;  // Get the QR code content
+      const newWindow = window.open('', '', 'width=800, height=600');
+      newWindow.document.write('<html><head><title>Print Label</title></head><body>');
+      newWindow.document.write(printContent);  // Only print the QR code
+      newWindow.document.write('</body></html>');
+      newWindow.document.close();  // Finish writing to the new window
+      newWindow.print();  // Trigger the print dialog
+    }
+  </script>
+
+</body>
+</html>/rest/v1/fabric?id=eq.${fabricId}`, {
+        method: "GET",
+        headers: {
+          "apikey": "<your-api-key>",
+          "Authorization": `Bearer <your-api-key>`,
+          "Content-Type": "application/json"
+        }
       });
 
-      // 调用打印
-      fetch("http://localhost:3000/print", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, ref, batch, width, color, length, roll })
-      })
-        .then(res => res.text())
-        .then(msg => console.log(msg))
-        .catch(err => console.error("打印失败:", err));
+      const fabricData = await res.json();
+
+      if (fabricData.length === 0) {
+        document.getElementById("fabric-details").innerText = "No data found for this fabric.";
+        return;
+      }
+
+      // Display fabric details
+      const fabric = fabricData[0];
+      document.getElementById("fabric-details").innerHTML = `
+        <p><strong>Ref:</strong> ${fabric.ref}</p>
+        <p><strong>Batch:</strong> ${fabric.batch}</p>
+        <p><strong>Width:</strong> ${fabric.width}</p>
+        <p><strong>Color:</strong> ${fabric.color}</p>
+        <p><strong>Length:</strong> ${fabric.length}</p>
+        <p><strong>Roll:</strong> ${fabric.roll}</p>
+      `;
+
+      // Generate QR code for this fabric
+      const url = `https://<your-deployed-url>/view.html?id=${fabricId}`;
+      new QRCode(document.getElementById("qrcode"), {
+        text: url,
+        width: 50,
+        height: 50
+      });
+    }
+
+    fetchFabricData();
+
+    function printLabel() {
+      const printContent = document.getElementById("qrcode").innerHTML;  // Get the QR code content
+      const newWindow = window.open('', '', 'width=800, height=600');
+      newWindow.document.write('<html><head><title>Print Label</title></head><body>');
+      newWindow.document.write(printContent);  // Only print the QR code
+      newWindow.document.write('</body></html>');
+      newWindow.document.close();  // Finish writing to the new window
+      newWindow.print();  // Trigger the print dialog
     }
   </script>
 
