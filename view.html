@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fabric Information</title>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  #info { font-size: 14px; }
+  #info div { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<h2>Fabric Information</h2>
+<div id="info">Loading...</div>
+
+<script>
+const SUPABASE_URL = "https://nbzlglatwvomrhflqvgi.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs";
+
+// 获取 URL 参数 id
+const params = new URLSearchParams(window.location.search);
+const rollId = params.get("id");
+
+if (!rollId) {
+    document.getElementById("info").innerText = "Invalid QR Code";
+} else {
+    fetch(`${SUPABASE_URL}/rest/v1/rolls?id=eq.${rollId}`, {
+        headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.length === 0) {
+            document.getElementById("info").innerText = "No Data Found";
+        } else {
+            const d = data[0];
+            document.getElementById("info").innerHTML = `
+                <div>Ref: ${d.ref}</div>
+                <div>Batch: ${d.batch}</div>
+                <div>Width: ${d.size}</div>
+                <div>Color: ${d.color}</div>
+                <div>Length: ${d.length} m</div>
+                <div>Roll#: ${d.roll_number}</div>
+                <div>Order#: ${d.order_number}</div>
+            `;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("info").innerText = "Error loading data";
+    });
+}
+</script>
+
+</body>
+</html>

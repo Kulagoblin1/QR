@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fabric QR System</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+input {
+  display: block;
+  margin: 5px 0;
+  padding: 5px;
+  width: 250px;
+}
+
+button {
+  padding: 8px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+#qrcode {
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Fabric Information</h2>
+
+<input id="ref" placeholder="Ref">
+<input id="batch" placeholder="Batch">
+<input id="width" placeholder="Width">
+<input id="color" placeholder="Color">
+<input id="length" placeholder="Length">
+<input id="roll" placeholder="Roll No">
+
+<button onclick="generate()">Generate QR + Print</button>
+
+<div id="qrcode"></div>
+
+<!-- QR库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+function generate() {
+
+  const ref = document.getElementById("ref").value;
+  const batch = document.getElementById("batch").value;
+  const width = document.getElementById("width").value;
+  const color = document.getElementById("color").value;
+  const length = document.getElementById("length").value;
+  const roll = document.getElementById("roll").value;
+
+  // 👉 生成唯一ID
+  const id = Date.now();
+
+  // 👉 生成URL（你线上地址）
+  const url = `https://fabricsystem.vercel.app/view.html?id=${id}`;
+
+  // 👉 显示二维码
+  document.getElementById("qrcode").innerHTML = "";
+  new QRCode(document.getElementById("qrcode"), {
+    text: url,
+    width: 150,
+    height: 150
+  });
+
+  // 👉 存数据库（Supabase）
+  fetch("https://nbzlglatwvomrhflqvgi.supabase.co/rest/v1/fabric", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs",
+      "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5iemxnbGF0d3ZvbXJoZmxxdmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2Mjk4NTIsImV4cCI6MjA5MTIwNTg1Mn0.lxkTMgLBBFv5y2O1jGLZVGcE-MiaA3JV8-p50irSgBs"
+    },
+    body: JSON.stringify({
+      id,
+      ref,
+      batch,
+      width,
+      color,
+      length,
+      roll
+    })
+  });
+
+  // 👉 调用本地打印（关键）
+  sendPrint({
+    url,
+    ref,
+    batch,
+    width,
+    color,
+    length,
+    roll
+  });
+
+}
+
+function sendPrint(data) {
+  fetch("http://localhost:3000/print", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(msg => console.log(msg))
+  .catch(err => console.error("打印失败:", err));
+}
+</script>
+
+</body>
+</html>
